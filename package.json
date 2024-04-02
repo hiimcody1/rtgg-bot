@@ -1,0 +1,37 @@
+{
+  "name": "rtgg-bot",
+  "version": "1.0.0",
+  "description": "Racetime.gg bot implemented in Node",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "tsc --build --clean",
+    "build": "npm run clean && tsc --project tsconfig.json",
+    "start": "npm run start:bot",
+    "start:bot": "npm run build && node --enable-source-maps dist/index.js",
+    "debug": "npm run build && node --inspect --enable-source-maps dist/index.js --"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiimcody1/rtgg-bot.git"
+  },
+  "keywords": [
+    "racetime",
+    "rtgg"
+  ],
+  "author": "hiimcody1",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hiimcody1/rtgg-bot/issues"
+  },
+  "homepage": "https://github.com/hiimcody1/rtgg-bot#readme",
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/ws": "^8.5.10",
+    "tiny-typed-emitter": "^2.1.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.4.4",
+    "ws": "^8.16.0"
+  }
+}
