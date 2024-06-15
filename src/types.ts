@@ -27,7 +27,13 @@ export interface RaceGoal {
     custom: boolean
 }
 
-export enum RaceStatus {
+export interface RaceStatus {
+    value: RaceStatusText,
+    verbose_value: string,
+    help_text: string
+}
+
+export enum RaceStatusText {
     OPEN = 'open',
     INVITATIONAL = 'invitational',
     PENDING = 'pending',
@@ -216,8 +222,8 @@ export interface RaceDetails extends CachableData {
 export interface RaceEntrants extends CachableData {
     user: UserData,
     status: RaceEntrantStatus,
-    finish_time?: Date,
-    finished_at?: Date,
+    finish_time?: typeof Temporal,
+    finished_at?: typeof Temporal,
     place: number,
     place_ordinal: string,
     score: number,
