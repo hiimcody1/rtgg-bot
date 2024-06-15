@@ -41,6 +41,11 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
         this.authExpireTime.setFullYear(2000);  //Invalid Date to force reauth
         this.raceDetailsCache = new Map();
         this.sockets = new Map();
+        this.authorize().then((authorized) => {
+            console.log(`Authorized: ${authorized}`);
+        }).catch((err) => {
+            console.log('Failed to auth:', err);
+        });
     }
 
     async joinRaceRoom(roomUrl: string): Promise<boolean> {
@@ -58,6 +63,13 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
                 });
                 socket.on('socket error', (err) => {
                     reject(err);
+                });
+                socket.on('close', (code, reason) => {
+                    if(code > 1000) {
+                        // Abnormal close reason
+                        console.log(`Abnormal disconnection reason: ${code} ${reason}, reconnecting...`);
+                        socket.reconnect();
+                    }
                 });
             });
         } else {

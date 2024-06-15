@@ -27,10 +27,12 @@ export default class WebSocketClient extends TypedEmitter<WebSocketEvents> {
     client: RacetimeClient;
     ready: boolean = false;
     messageQueue: RTAction[] = [];
+    private socketUrl: string;
 
     constructor(client: RacetimeClient, raceSocketUrl: string) {
         super();
-        this.socket = new WebSocket(`wss://racetime.gg${raceSocketUrl}`, {
+        this.socketUrl = raceSocketUrl;
+        this.socket = new WebSocket(`wss://racetime.gg${this.socketUrl}`, {
             headers: {
                 "authorization": `Bearer ${client.auth.access_token}`
             }
@@ -57,6 +59,38 @@ export default class WebSocketClient extends TypedEmitter<WebSocketEvents> {
 
         this.socket.on("error", (err) => {
             console.log(`Socket error ${err.toString()} when connecting to ${raceSocketUrl}`);
+            this.emit("socket error", err);
+        })
+    }
+
+    reconnect() {
+        this.socket = new WebSocket(`wss://racetime.gg${this.socketUrl}`, {
+            headers: {
+                "authorization": `Bearer ${this.client.auth.access_token}`
+            }
+        });
+
+        this.socket.on("open", () => {
+            this.emit("ready", this.socket.url);
+            this.ready = true;
+            this.messageQueue.forEach((message) => {
+                this.socket.send(JSON.stringify(message));
+            });
+            this.messageQueue = [];
+        });
+
+        this.socket.on("message", (data) => {
+            this.emit("raw message", data);
+            this.handleMessage(data);
+        })
+
+        this.socket.on("close", (code, reason) => {
+            console.log(`Socket closed with code ${code} and reason ${reason}`);
+            this.emit("close", code, reason);
+        })
+
+        this.socket.on("error", (err) => {
+            console.log(`Socket error ${err.toString()} when connecting to ${this.socketUrl}`);
             this.emit("socket error", err);
         })
     }
