@@ -1,6 +1,6 @@
 import { TypedEmitter } from "tiny-typed-emitter";
 import WebSocketClient from "./websocket/client.js";
-import { CreateRaceData, RaceDetails, RaceData, CategoryDetail, RTPacketTypes, RaceStatus } from "./types.js";
+import { CreateRaceData, RaceDetails, RaceData, CategoryDetail, RTPacketTypes, RaceStatus, RaceStatusText } from "./types.js";
 
 type Credentials = {
     access_token: string,
@@ -107,7 +107,7 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
             action: RTPacketTypes.CANCEL
         });
         const newData = await this.fetchRaceData(raceUrl);
-        if(newData.status == RaceStatus.CANCELLED) {
+        if(newData.status.value == RaceStatusText.CANCELLED) {
             return true;
         }
         return false;
@@ -204,6 +204,6 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
         }
         if(!init) init = {headers: {}};
         init.headers["Authorization"] = `Bearer ${this.auth.access_token}`;
-        return fetch(url, init);
+        return await fetch(url, init);
     }
 }
