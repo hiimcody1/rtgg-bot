@@ -1,7 +1,7 @@
 import WebSocket, { RawData } from 'ws';
-import RacetimeClient from '../index.js';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import { ChatHistoryMessage, ChatMessage, DeletedMessage, PurgeUser, RacetimeError, RaceData, RTMessage, RTMessageTypes, RTAction } from '../types.js';
+import RacetimeClient from '..';
+import { ChatHistoryMessage, ChatMessage, DeletedMessage, PurgeUser, RacetimeError, RaceData, RTAction, RTMessage, RTMessageTypes } from '../types';
 
 interface WebSocketEvents {
     'ready':        (url: string) => void;
@@ -31,6 +31,7 @@ export default class WebSocketClient extends TypedEmitter<WebSocketEvents> {
 
     constructor(client: RacetimeClient, raceSocketUrl: string) {
         super();
+        this.client = client;
         this.socketUrl = raceSocketUrl;
         this.socket = new WebSocket(`wss://racetime.gg${this.socketUrl}`, {
             headers: {

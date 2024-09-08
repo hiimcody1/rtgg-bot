@@ -1,6 +1,6 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import WebSocketClient from "./websocket/client.js";
-import { CreateRaceData, RaceDetails, RaceData, CategoryDetail, RTPacketTypes, RaceStatus, RaceStatusText } from "./types.js";
+import WebSocketClient from "./websocket/client";
+import { CreateRaceData, RaceDetails, RaceData, CategoryDetail, RTPacketTypes, RaceStatus, RaceStatusText } from "./types";
 
 type Credentials = {
     access_token: string,
@@ -42,9 +42,9 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
         this.raceDetailsCache = new Map();
         this.sockets = new Map();
         this.authorize().then((authorized) => {
-            console.log(`Authorized: ${authorized}`);
+            console.trace(`Authorized: ${authorized}`);
         }).catch((err) => {
-            console.log('Failed to auth:', err);
+            console.error('Failed to auth:', err);
         });
     }
 
@@ -67,7 +67,7 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
                 socket.on('close', (code, reason) => {
                     if(code > 1000) {
                         // Abnormal close reason
-                        console.log(`Abnormal disconnection reason: ${code} ${reason}, reconnecting...`);
+                        console.warn(`Abnormal disconnection reason: ${code} ${reason}, reconnecting...`);
                         socket.reconnect();
                     }
                 });
@@ -134,7 +134,7 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
             } catch(e) {
                 console.error(e);
                 try {
-                    console.log(await raceData.clone().text());
+                    console.trace(await raceData.clone().text());
                 } catch(e2) {
                     console.error(e2);
                 }
@@ -163,7 +163,7 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
      * @param message The message to send
      * @param pin Whether or not to pin the message
      */
-    async sendMessage(raceUrl: string, message: string, pin: boolean = false) {
+    async sendMessage(raceUrl: string, message: string, pin: boolean = false): Promise<void> {
         const raceData = await this.fetchRaceData(raceUrl);
         await this.joinRaceRoom(raceData.websocket_bot_url);
         const socket = this.sockets.get(raceData.websocket_bot_url);
@@ -196,7 +196,7 @@ export default class RacetimeClient extends TypedEmitter<RacetimeEvents> {
         }
     }
 
-    private async authenticatedFetch(url: string, init?: RequestInit) {
+    private async authenticatedFetch(url: string, init?: RequestInit): Promise<Response> {
         if(this.authExpireTime.getTime() <= new Date().getTime()) {
             if(!await this.authorize()) {
                 throw new Error(`Unable to refresh access_token!`);
